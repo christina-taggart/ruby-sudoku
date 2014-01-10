@@ -1,5 +1,5 @@
 class Cell
-  attr_accessor :value, :row, :col, :box
+  attr_accessor :value, :row, :col, :box, :possible_nums
 
   def initialize(index, value = 0)
     @row = (index / 9) + 1
@@ -8,7 +8,6 @@ class Cell
     find_box
     @value = value
     @possible_nums = []
-    @not_possible = []
   end
 
   private
@@ -28,6 +27,7 @@ end
 
 
 class Sudoku
+  attr_accessor :board
 
   def initialize(board_string)
     @board = []
@@ -37,14 +37,36 @@ class Sudoku
   end
 
   def solve!
+    board_vals = @board.map{ |cell| cell.value }
+    while board_vals.include?("0")
+      update_value
+      board_vals = @board.map{ |cell| cell.value }
+    end
   end
 
   def find_used_values(cell)
     used_values = []
-    used_values << get_box(cell.box)
-    used_values << get_row(cell.row)
-    used_values << get_col(cell.col)
-    used_values.map!{ |cell| cell.value }
+    used_values << get_box(cell.box) << get_row(cell.row) << get_col(cell.col)
+    used = used_values.flatten.map{ |cell| cell.value }
+    used.delete("0")
+    used.uniq
+  end
+
+  def update_possible_vals
+    @board.each do |cell|
+      if cell.value == "0"
+        cell.possible_nums = ("1".."9").to_a - find_used_values(cell)
+      end
+    end
+  end
+
+  def update_value
+    update_possible_vals
+    @board.each do |cell|
+      if cell.possible_nums.length == 1
+        cell.value = cell.possible_nums[0]
+      end
+    end
   end
 
   def board
@@ -70,18 +92,32 @@ end
 
 # The file has newlines at the end of each line, so we call
 # String#chomp to remove them.
-board_string = File.readlines('sample.unsolved.txt').first.chomp
+def line(msg)
+  puts "\n------- #{msg} -------"
+end
+
+
+board_string = File.readlines('sample.unsolved.txt')[7].chomp
 
 game = Sudoku.new(board_string)
-
+line("board")
 game.board
 
-puts "\n--- box ---"
-game.get_box(1).each{ |cell| print "#{cell.value} " }
-puts "\n--- row ---"
+line("box")
+game.get_box(1).each_slice(3) do |slice|
+  slice.each { |cell| print "#{cell.value} " }
+  puts ""
+end
+line("row")
 game.get_row(1).each{ |cell| print "#{cell.value} " }
-puts "\n--- col ---"
-game.get_col(1).each{ |cell| print "#{cell.value} " }
+line("col")
+game.get_col(1).each{ |cell| puts "#{cell.value} " }
+
+line("previous board")
+game.board
+line("updated board")
+game.solve!
+game.board
 
 # Remember: this will just fill out what it can and not "guess"
 # game.solve!
