@@ -40,18 +40,18 @@ class Sudoku
 
   def solve!
     #BASE CASE: does the board contain any blank spaces (i.e. 0s)?
-    @matrix_board unless @matrix_board.to_a.flatten.include?(0)
-    #ELSE:
-    @matrix_board.each_with_index do |square, row, col|
-      if square == 0
-        square_index = [row, col]
-        not_possible_values = get_row(square_index) + get_column(square_index) + get_block(square_index)
-        not_possible_values.uniq!.delete(0)
-        possible_values = (1..9).to_a - not_possible_values
-        if possible_values.length == 1
-          temp_matrix_board = @matrix_board.to_a
-          temp_matrix_board[row][col] = possible_values[0]
-          @matrix_board = Matrix.rows(temp_matrix_board)
+    until !@matrix_board.to_a.flatten.include?(0)
+      @matrix_board.each_with_index do |square, row, col|
+        if square == 0
+          square_index = [row, col]
+          not_possible_values = get_row(square_index) + get_column(square_index) + get_block(square_index)
+          not_possible_values.uniq!.delete(0)
+          possible_values = (1..9).to_a - not_possible_values
+          if possible_values.length == 1
+            temp_matrix_board = @matrix_board.to_a
+            temp_matrix_board[row][col] = possible_values[0]
+            @matrix_board = Matrix.rows(temp_matrix_board)
+          end
         end
       end
     end
