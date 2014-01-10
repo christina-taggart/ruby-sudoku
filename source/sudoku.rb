@@ -1,4 +1,5 @@
 class Sudoku
+  IS_LOGGING = false
   # 105802000 090076405 200400819
   # 019007306 762083090 000061050
   # 007600030 430020501 600308900
@@ -9,31 +10,28 @@ class Sudoku
 
   def solve!
     until solved?
-      p "executing complete_first_known_cell"
       complete_first_known_cell
     end
   end
 
   def complete_first_known_cell
     @grid.each_with_index do |row, r_idx|
-      #p "scanning row: #{r_idx}"
       row.each_with_index do |cell, c_idx|
         if cell.to_i.zero?
-          p "scanning cell: (#{r_idx},#{c_idx})"
+          p "scanning cell: (#{r_idx},#{c_idx})" if IS_LOGGING
           cell_possibilities = %w(1 2 3 4 5 6 7 8 9)
-          p cell_possibilities
-          p get_values_in_row(r_idx)
-          get_values_in_row(r_idx).each { |row_value| p  cell_possibilities.delete(row_value) }
-          p cell_possibilities
-
-          p get_values_in_col(c_idx)
-          get_values_in_col(c_idx).each { |col_value| p cell_possibilities.delete(col_value) }
-          p cell_possibilities
-          get_values_in_box(r_idx / 3, c_idx / 3).each { |box_value|  cell_possibilities.delete(box_value) }
-          p cell_possibilities
+          p cell_possibilities if IS_LOGGING
+          p get_values_in_row(r_idx) if IS_LOGGING
+          get_values_in_row(r_idx).each { |row_value| cell_possibilities.delete(row_value) }
+          p cell_possibilities if IS_LOGGING
+          p get_values_in_col(c_idx) if IS_LOGGING
+          get_values_in_col(c_idx).each { |col_value| cell_possibilities.delete(col_value) }
+          p cell_possibilities if IS_LOGGING
+          get_values_in_box(r_idx / 3, c_idx / 3).each { |box_value| cell_possibilities.delete(box_value) }
+          p cell_possibilities if IS_LOGGING
           if cell_possibilities.length.eql?(1)
             @grid[r_idx][c_idx] = cell_possibilities[0]
-            p "row: #{r_idx} col: #{c_idx} adding value: #{cell_possibilities[0]}"
+            p "row: #{r_idx} col: #{c_idx} adding value: #{cell_possibilities[0]}" if IS_LOGGING
             return nil
           end
         end
