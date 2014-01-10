@@ -1,5 +1,20 @@
+require 'matrix'
+
 class Sudoku
   def initialize(board_string)
+    @board_string = board_string
+    formatted_board = @board_string.scan(/\d{9}/)
+    formatted_board.map! do |x|
+      x.scan(/./)
+    end
+    formatted_board.each do |x|
+      x.map! do |y|
+        y.to_i
+      end
+    end
+    formatted_board
+    sudoku_board = Matrix.rows(formatted_board)
+p sudoku_board[0]
   end
 
   def solve!
