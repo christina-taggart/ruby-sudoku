@@ -1,5 +1,14 @@
+require 'matrix'
+
 class Sudoku
   def initialize(board_string)
+    board = []
+    board_string.split("").each_slice(9) {|row| board << row }
+    matrix_board = Matrix.rows(board)
+    # p board
+    # p "________"
+    # p matrix_board
+    # puts matrix_board[1,1]
   end
 
   def solve!
@@ -13,13 +22,13 @@ class Sudoku
   end
 end
 
-# The file has newlines at the end of each line, so we call
-# String#chomp to remove them.
-board_string = File.readlines('sample.unsolved.txt').first.chomp
 
+#-----DRIVERS-----
+
+board_string = File.readlines('sample.unsolved.txt').first.chomp
 game = Sudoku.new(board_string)
 
-# Remember: this will just fill out what it can and not "guess"
+p board_string
+
 game.solve!
 
-puts game.board
