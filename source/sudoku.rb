@@ -4,7 +4,7 @@ class Cell
   attr_accessor :value, :column, :row, :box
 
   def initialize(value, flat_index, size  = 81)
-    @size = Math.sqrt(size).to_i #Math.sqrt(flat_index.length)
+    @size = Math.sqrt(size).to_i
     @value = value
     @column = flat_index % @size + 1
     @row = flat_index / @size + 1
@@ -23,74 +23,37 @@ class Cell
 
 end
 
-
-
-
-e_coli = Cell.new(5, 2)
-p e_coli.column == 3
-p e_coli.row == 1
-e_coli.box == 1
-
-test = Cell.new(8, 3)
-p test.box == 2
-
-
-
-
-
-
-
 class Sudoku
   def initialize(board_string)
     @board_array = board_string.split("").to_a
     @array_of_cells = @board_array.each_with_index.map { |x, i| Cell.new(x, i) }
-    # board_of_cells = board_of_cells.map! { |x| x.cell}
   end
-
-  # Iterate through each cell where value != 0
-    # Check to see possible from column
-    # Check to see possible from row
-    # Check to see possible from box
-    # Assign intersection of above 3 to possible values
-
-    # Maybe: if intersection.length == 1 assign value to cell
 
   def solve!
-      # binding.pry
-  end
-
-  # Return possible values based on row
-  def possible_from_column(cell_to_test)
-    possible_values = ('1'..'9').to_a
-    @array_of_cells.each do |cell|
-      if cell_to_test.column == cell.column
-        puts "Value to delete: #{cell.value}"
-        possible_values.delete(cell.value)
+    until !@array_of_cells.map { |cell| cell.value}.include?("0")
+      @array_of_cells.each do |cell|
+        if cell.value == "0"
+          possible_values = possible_from_all(cell)
+          if possible_values.length == 1
+            cell.value = possible_values[0]
+          end
+        end
       end
     end
-    possible_values
   end
 
-  # Return possible values based on column
-  def possible_from_row(cell_to_test)
+  def possible_from_all(cell_to_test)
+    attributes = ["row", "column", "box"]
     possible_values = ('1'..'9').to_a
-    @array_of_cells.each do |cell|
-      if cell_to_test.row == cell.row
-        possible_values.delete(cell.value)
-      end
-    end
-    possible_values
-  end
 
-  # Return possible values based on box
-  def possible_from_box(cell_to_test)
-    possible_values = ('1'..'9').to_a
-    @array_of_cells.each do |cell|
-      if cell_to_test.box == cell.box
-        possible_values.delete(cell.value)
+    attributes.each do |att|
+      @array_of_cells.each do |cell|
+        if eval("cell_to_test.#{att} == cell.#{att}")
+          possible_values.delete(cell.value)
+        end
       end
     end
-    possible_values
+      possible_values
   end
 
   # Returns a string representing the current state of the board
@@ -107,7 +70,7 @@ end
 
 # The file has newlines at the end of each line, so we call
 # String#chomp to remove them.
-board_string = File.readlines('sample.unsolved.txt').first.chomp
+board_string = File.readlines('sample.unsolved.txt')[5].chomp
 
 game = Sudoku.new(board_string)
 
@@ -116,6 +79,13 @@ game = Sudoku.new(board_string)
 
 puts game.board
 
-p game.possible_from_column(e_coli)
-p game.possible_from_row(e_coli)
-p game.possible_from_box(e_coli)
+# cell_a = Cell.new(0, 1)
+# cell_b = Cell.new(0, 31)
+# cell_c = Cell.new(7, 32)
+
+# p game.possible_from_all(cell_a) == ["4", "7"]
+# p game.possible_from_all(cell_b) == ["4", "5"]
+# p game.possible_from_all(cell_c)
+game.solve!
+
+puts game.board
