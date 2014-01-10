@@ -11,6 +11,12 @@ class Sudoku
   def board
 
   end
+
+  # pass in two arrays, get the values from each array
+  # that aren't in the other array
+  def get_set_diff (set1, set2)
+    (set1 - set2) + (set2 - set1)
+  end
 end
 
 # The file has newlines at the end of each line, so we call
