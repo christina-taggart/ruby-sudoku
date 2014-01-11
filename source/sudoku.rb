@@ -27,19 +27,62 @@ class Sudoku
   def initialize(board_string)
     @board_array = board_string.split("").to_a
     @array_of_cells = @board_array.each_with_index.map { |x, i| Cell.new(x, i) }
+    @size = 81
   end
 
   def solve!
+    new_board, old_board = []
     until !@array_of_cells.map { |cell| cell.value}.include?("0")
-      @array_of_cells.each do |cell|
-        if cell.value == "0"
-          possible_values = possible_from_all(cell)
-          if possible_values.length == 1
-            cell.value = possible_values[0]
-          end
+      old_board = @array_of_cells.map { |cell| cell.value }
+      update_board
+      new_board = @array_of_cells.map { |cell| cell.value }
+
+      break if new_board == old_board
+    end
+    puts self.board
+    if new_board == old_board
+      p "recursing"
+      recursive_solve(0)
+    end
+    # recursive_solve if @array_of_cells.map { |cell| cell.value}.include?("0")
+  end
+
+  def update_board
+    @array_of_cells.each do |cell|
+      if cell.value == "0"
+        possible_values = possible_from_all(cell)
+        if possible_values.length == 1
+          cell.value = possible_values[0]
         end
       end
     end
+  end
+
+  def recursive_solve(index_of_cell_array)
+    cell = @array_of_cells[index_of_cell_array]
+    #p @array_of_cells.map { |cell| cell.value}
+
+      if index_of_cell_array == @size
+        puts "END"
+        puts self.board
+        return true
+      end
+
+      if cell.value != "0"
+        recursive_solve(index_of_cell_array + 1)
+      else
+        possible_from_all(cell).each do |guess|
+
+          cell.value = guess
+          if recursive_solve(index_of_cell_array + 1)
+            puts index_of_cell_array
+            return true
+          else
+            cell.value = "0"
+          end
+        end
+      end
+      return false
   end
 
   def possible_from_all(cell_to_test)
@@ -70,7 +113,7 @@ end
 
 # The file has newlines at the end of each line, so we call
 # String#chomp to remove them.
-board_string = File.readlines('sample.unsolved.txt')[5].chomp
+board_string = File.readlines('sample.unsolved.txt')[12].chomp
 
 game = Sudoku.new(board_string)
 
@@ -88,4 +131,5 @@ puts game.board
 # p game.possible_from_all(cell_c)
 game.solve!
 
-puts game.board
+# puts game.board
+
