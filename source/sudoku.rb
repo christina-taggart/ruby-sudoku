@@ -3,29 +3,8 @@ class Sudoku
     @given = given
     @needed = [1,2,3,4,5,6,7,8,9]
     @rows = create_rows
-
+    @columns = @rows.transpose
   end
-
- #@given_row = @rows[i]
-  #complete is 1..9
-  #needed starts at 1..9
-    def check_row(given_row)
-      i = 0
-    given_row = @rows[i]
-    until i == @rows.length
-       checking = given_row.clone.delete_if {|element| element == 0}
-       @needed -= checking
-       @needed
-      end
-     i += 1
-   end
-
- def check_column(given_column)
-    # columns = @rows.transpose
-     checking = given_column.clone.delete_if {|element| element == 0}
-     @needed -= checking
-     # p columns
-   end
 
 #create a nested array of rows from original given string
    def create_rows
@@ -38,6 +17,14 @@ class Sudoku
       rows
    end
 
+  def check(row_or_col_or_box)
+    needed = @needed.clone
+    needed -= row_or_col_or_box
+    needed
+  end
+
+###psuedocode solve
+#
 def solve!
 
 end
@@ -53,18 +40,78 @@ end
 # The file has newlines at the end of each line, so we call
 # String#chomp to remove them.
 given = File.readlines('sample.unsolved.txt').first.chomp
- # given_row = [0,0,3,5,0,1,0,9,4]
- # given_column = [1, 0, 2, 0, 7, 0, 0, 4, 6]
+ given_row = [0,0,3,5,0,1,0,9,4]
+ given_column = [1, 0, 2, 0, 7, 0, 0, 4, 6]
     needed = [1,2,3,4,5,6,7,8,9]
 game = Sudoku.new(given)
 
 
-
+def assert(expected, actual)
+  if expected == actual
+    nil
+  else
+    "expected: #{expected} got #{actual}"
+  end
+end
 p game.board == "105802000090076405200400819019007306762083090000061050007600030430020501600308900"
-p game.check_row([1, 0, 5, 8, 0, 2, 0, 0, 0]) == [3, 4, 6, 7, 9]
-p game.check_column([1, 0, 2, 0, 7, 0, 0, 4, 6]) == [3, 5, 8, 9]
+p assert([2, 6, 7, 8], game.check_row(given_row))
+p game.check_row(given_row) == [2, 6, 7, 8]
+p game.check_column(given_column) == [3, 5, 8, 9]
 p game.create_rows
 
 
 # Remember: this will just fill out what it can and not "guess"
 # game.solve!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ #      i = 0
+ #      until i == @rows.length
+ #         given_row = @rows[i]
+ #         checking = given_row.clone.delete_if {|element| element == 0}
+ #         rows_needed = @needed.clone
+ #         rows_needed -= checking
+ #         #p
+ #         i += 1
+ #      end
+ #       rows_needed
+ #   end
+
+ # def check_column(given_column)
+ #    i = 0
+ #    until i == @columns.length
+ #      given_column = @columns[i]
+ #      checking = given_column.clone.delete_if {|element| element == 0}
+ #      columns_needed = @needed.clone
+ #      columns_needed -= checking
+ #      #p
+ #      i += 1
+ #   end
+ #   columns_needed
+ # end
