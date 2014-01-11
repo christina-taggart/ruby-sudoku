@@ -85,29 +85,3 @@ describe SudokuCell do
     expect(sudoku_cell.local_grid_index).to eq(8)
   end
 end
-
-
-  # def initialize(index, value)
-  #   @index = index
-  #   @value = value
-  # end
-
-  # def row_index
-
-  # end
-
-  # def column_index
-  #   # mod 9
-  # end
-
-  # def local_grid_index
-
-  # end
-
-  # def solved?
-
-  # end
-
-  # def solve!(new_value)
-
-  # end

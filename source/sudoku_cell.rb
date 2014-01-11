@@ -1,29 +1,16 @@
 class SudokuCell
+  attr_reader :row_index, :column_index, :index, :value
 
   def initialize(index, value = 0)
     @index = index
     @value = value
-    @row, @col = index.divmod(9)
+    @row_index, @column_index = index.divmod(9)
   end
-
-  def row_index
-    @row
-  end
-
-  def column_index
-    @col
-  end
-
 
   def local_grid_index
-    local_grid_values = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-    ]
-    row = (@row / 3).floor
-    col = (@col / 3).floor
-    local_grid_values[row][col]
+    row = @row_index / 3
+    col = @column_index / 3
+    row * 3 + col
   end
 
   def solved?
