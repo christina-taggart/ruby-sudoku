@@ -32,27 +32,25 @@ describe SudokuBoard do
     expect(empty_cell.column_index).to eq(0)
   end
 
-    test_board = <<-EOS
-1 0 5 8 0 2 0 0 0
-0 9 0 0 7 6 4 0 5
-2 0 0 4 0 0 8 1 9
-0 1 9 0 0 7 3 0 6
-7 6 2 0 8 3 0 9 0
-0 0 0 0 6 1 0 5 0
-0 0 7 6 0 0 0 3 0
-4 3 0 0 2 0 5 0 1
-6 8 9 3 0 8 9 0 0
-EOS
+  test_board = "
+    1 0 5 8 0 2 0 0 0
+    0 9 0 0 7 6 4 0 5
+    2 0 0 4 0 0 8 1 9
+    0 1 9 0 0 7 3 0 6
+    7 6 2 0 8 3 0 9 0
+    0 0 0 0 6 1 0 5 0
+    0 0 7 6 0 0 0 3 0
+    4 3 0 0 2 0 5 0 1
+    6 8 9 3 0 8 9 0 0"
+  .gsub!(/\s+/, "")
 
  it "figures out if current space can be solved" do
-    test_board.gsub!(/\s+/, "")
     board = SudokuBoard.new(test_board)
     cell = SudokuCell.new(54)
     expect(board.can_current_space_be_solved(cell)).to eq(5)
   end
 
   it "gets solved cells related cells" do
-    test_board.gsub!(/\s+/, "")
     board = SudokuBoard.new(test_board)
     cell = SudokuCell.new(80, 1)
     results = board.get_solved_related_cells(cell)
@@ -71,7 +69,6 @@ EOS
     expect(results[11].value).to eq(9)
   end
   it "gets solved cells related cells" do
-    test_board.gsub!(/\s+/, "")
     board = SudokuBoard.new(test_board)
     cell = SudokuCell.new(0, 1)
     results = board.get_solved_related_cells(cell)
