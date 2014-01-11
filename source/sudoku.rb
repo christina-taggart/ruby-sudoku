@@ -1,3 +1,5 @@
+require 'pry'
+require 'pry-nav'
 =begin
 class Sudoku
   def initialize(board_string)
@@ -27,91 +29,115 @@ end
 
 class Cell
   attr_accessor :row, :column, :value, :local_grid, :possible_set
-  def initialize
-    @row = 0
-    @column = 0
+  def initialize(index)
+    @row = []
+    @column = []
     @value = 0
     @local_grid = 0
     @possible_set = (1..9).to_a
+    @index = index
+  end
+
+  def solve
+     # binding.pry
+    if @value == 0
+      total_elimination = (@row + @column + @local_grid).uniq.select{|x| x!=0}
+      #p total_elimination
+      # p @possible_set
+      @possible_set -= total_elimination
+      # p @possible_set
+
+
+      if @possible_set.empty?
+        # binding.pry
+         puts "This is unsolvable"
+      end
+      if @possible_set.length == 1
+        binding.pry
+        @value += @possible_set[0]
+        puts "Value changed to #{@value}"
+        @row[@index / 9] = @value
+        @column[@index % 9] = @value
+
+
+      end
+    end
   end
 end
 
 class Sudoku
-  attr_accessor :board
+  attr_accessor :board, :value_list
   def initialize(board_string)
     @number_list = board_string.split("").map! {|num| num.to_i}
     @board = []
-    81.times {@board << Cell.new}
+    (0..80).each  { |n| @board << Cell.new(n)}
     sliced_board = @board.each_slice(9).to_a
-    @row1 = sliced_board[0]
-    @row2 = sliced_board[1]
-    @row3= sliced_board[2]
-    @row4 = sliced_board[3]
-    @row5 = sliced_board[4]
-    @row6 = sliced_board[5]
-    @row7 = sliced_board[6]
-    @row8 = sliced_board[7]
-    @row9 = sliced_board[8]
-    @rows = [@row1, @row2,@row3,@row4,@row5,@row6,@row7,@row8,@row9]
+    set_board
+  end
 
-    vertical_sliced_board = sliced_board.transpose
+  def set_board
+    board_assign(@number_list)
+  end
 
-    @column1 = vertical_sliced_board[0]
-    @column2 = vertical_sliced_board[1]
-    @column3= vertical_sliced_board[2]
-    @column4 = vertical_sliced_board[3]
-    @column5 = vertical_sliced_board[4]
-    @column6 = vertical_sliced_board[5]
-    @column7 = vertical_sliced_board[6]
-    @column8 = vertical_sliced_board[7]
-    @column9 = vertical_sliced_board[8]
-    @columns = [@column1, @column2,@column3,@column4,@column5,@column6,@column7,@column8,@column9]
+  def change_board
+    @value_list = @board.map{|cell| cell.value}
+    board_assign(@value_list)
+  end
 
-    @box1 = get_local_grid(1)
-    @box2 = get_local_grid(2)
-    @box3 = get_local_grid(3)
-    @box4 = get_local_grid(4)
-    @box5 = get_local_grid(5)
-    @box6 = get_local_grid(6)
-    @box7 = get_local_grid(7)
-    @box8 = get_local_grid(8)
-    @box9 = get_local_grid(9)
-    @boxes = [@box1, @box2, @box3, @box4, @box5, @box6, @box7, @box8, @box9]
-
+  def board_assign(list)
     @board.each do |cell|
       cell_index = @board.index(cell)
-      cell.value = @number_list[cell_index]
-      cell.row = @rows[cell_index / 9]
-      cell.column = @columns[cell_index % 9]
-      # cell.local_grid = @boxes.find {|box| box.include?(cell)}
+      cell.value = list[cell_index]
+      cell.row = list.each_slice(9).to_a[cell_index / 9]
+      cell.column = list.each_slice(9).to_a.transpose[cell_index % 9]
+      grid_num = get_grid_number(cell_index+1)
+      cell.local_grid = get_local_grid(list, grid_num).flatten
     end
-
   end
 
-  def get_local_grid(box_num)
-    board = @board.each_slice(27).to_a
+  def get_local_grid(board, box_num)
+    board = board.each_slice(27).to_a
     box_row = (box_num-1) / 3
     box_column = (box_num-1) % 3
-    section_to_search = board[box_row]
-    section_to_search = section_to_search.each_slice(9).to_a
-    section_to_search = section_to_search.transpose.each_slice(3).to_a
-    # p section_to_search.length
-    local_grid = section_to_search[box_column]
+    section_to_search = board[box_row].each_slice(9).to_a.transpose.each_slice(3).to_a[box_column]
+  end
+
+  def get_grid_number(index)
+    sliced_numbers = (1..81).to_a.each_slice(27).to_a
+    return 9 if index == 81
+    section = sliced_numbers.find{|num| num.include?(index)}.each_slice(9).to_a.transpose.each_slice(3).to_a.flatten
+    box_number = section.index(index) / 9
+    box_number += (index / 27 ) * 3 + 1
+  end
+
+  def solved?
+    columns_complete = true
+    rows_complete = true
+    completed_item = (1..9).to_a
+    (0..8).each do |n|
+      columns_complete = false if @board[n].column.sort != completed_item
+    end
+    (0..80).step(9).each do |n|
+      rows_complete = false if @board[n].row.sort != completed_item
+    end
+    columns_complete && rows_complete
   end
 end
-board_string = File.readlines('sample.unsolved.txt').first.chomp
-
+# board_string = File.readlines('sample.unsolved.txt').first.chomp
+board_string = '094000007135800940000005030008310200012040580003058700040900000051002498300000170'
 sudoku = Sudoku.new(board_string)
-sudoku.board.each {|x| puts "#{x.local_grid} #{x.value}"}
+#sudoku.board.each {|x| puts "#{x.column} #{x.row} #{x.local_grid} #{x.value}"}
+
+until sudoku.solved?
+  sudoku.board.each do |cell|
+    # p cell.value
+    cell.solve
+    sudoku.change_board
+    # p "changing #{cell.value}"
+    break if sudoku.solved?
+  end
+
+end
 
 
-
-
-
-
-
-
-
-
-
-
+p sudoku.solved?
