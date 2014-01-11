@@ -63,19 +63,20 @@ class Sudoku
     #p @array_of_cells.map { |cell| cell.value}
 
       if index_of_cell_array == @size
-        puts "END"
-        puts self.board
+        puts "Solution is: \n\n #{self.board}"
         return true
       end
 
       if cell.value != "0"
         recursive_solve(index_of_cell_array + 1)
       else
+        # Loop for each possible cell value
         possible_from_all(cell).each do |guess|
-
+          # Set the cell value to the guess
           cell.value = guess
+          #Run recursive solve on the next cell
           if recursive_solve(index_of_cell_array + 1)
-            puts index_of_cell_array
+            # If cell after current cell has returned true, return true
             return true
           else
             cell.value = "0"
@@ -113,7 +114,7 @@ end
 
 # The file has newlines at the end of each line, so we call
 # String#chomp to remove them.
-board_string = File.readlines('sample.unsolved.txt')[12].chomp
+board_string = File.readlines('sample.unsolved.txt')[11].chomp
 
 game = Sudoku.new(board_string)
 
