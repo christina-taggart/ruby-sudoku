@@ -4,45 +4,39 @@ class Sudoku
 
   def initialize(board_string)
     @board_string = board_string
-    @sudoku_board = board_string.split("").each_slice(9).to_a.map! {|line| line.map! {|num| num.to_i}}
+    @sudoku_board = board_string.split("").each_slice(9).to_a.map! {|row| row.map! {|cell| cell.to_i}}
     @possible_answers = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     @box0, @box1, @box2, @box3, @box4, @box5, @box6, @box7, @box8 = [], [], [], [], [], [], [], [], []
   end
 
-  def solve!
-    row, column = 0, 0
-    @sudoku_board.each do |row_on_board|
-      row_on_board.each do |number|
-        assign_to_box(row, column)
-        possible_solutions = check_cell(row, column)
-        if possible_solutions.length == 1 && @sudoku_board[row][column] == 0
-          @sudoku_board[row][column] = possible_solutions[0]
-        end
-        # puts "#{number} is at (#{row}, #{column})."
-        column += 1
-      end
-      column = 0
-      row += 1
-    end
+  def is_it_solved?
+    !@sudoku_board.flatten.include?(0)
   end
 
-  # def get_all_coords
-  #   row, column = 0, 0
-  #   @sudoku_board.each do |row_on_board|
-  #     row_on_board.each do |number|
-  #       coordinates = (row, column)
-  #       column += 1
-  #     end
-  #     column = 0
-  #     row += 1
-  #   end
-  # end
+  def solve!
+    while !is_it_solved?
+      row, column = 0, 0
+      @sudoku_board.each do |row_on_board|
+        row_on_board.each do |number|
+          assign_to_box(row, column)
+          possible_solutions = check_cell(row, column)
+          if possible_solutions.length == 1 && @sudoku_board[row][column] == 0
+            @sudoku_board[row][column] = possible_solutions[0]
+          end
+          # puts "#{number} is at (#{row}, #{column})."
+          column += 1
+        end
+        column = 0
+        row += 1
+      end
+    end
+  end
 
   def what_is_in_this_row(row)
     @sudoku_board[row]
   end
 
-  def check_row(row)
+  def possible_values_in_row(row)
     possible_answers_in_row = @possible_answers.clone
     (1..9).each do |num|
       possible_answers_in_row.delete(num) if @sudoku_board[row].include?(num)
@@ -54,7 +48,7 @@ class Sudoku
     @sudoku_board.transpose[column]
   end
 
-  def check_column(column)
+  def possible_values_in_column(column)
     possible_answers_in_column = @possible_answers.clone
     (1..9).each do |num|
       possible_answers_in_column.delete(num) if @sudoku_board.transpose[column].include?(num)
@@ -86,7 +80,7 @@ class Sudoku
     end
   end
 
-  def check_box(row, column)
+  def possible_values_in_box(row, column)
     box_coords = [row / 3, column / 3]
     case box_coords
       when [0,0]
@@ -110,16 +104,15 @@ class Sudoku
     end
   end
 
-  # Returns a string representing the current state of the board
-  # Don't spend too much time on this method; flag someone from staff
-  # if you are.
-
   def check_cell(row, column)
-    possible_in_cell = check_row(row) & check_column(column) & check_box(row, column)
+    possible_in_cell = possible_values_in_row(row) & possible_values_in_column(column) & possible_values_in_box(row, column)
   end
 
   def board
-
+  	@sudoku_board.each do |row|
+      row.each {|cell| print "#{cell} "} 
+      puts
+    end
   end
 end
 
@@ -131,19 +124,21 @@ end
 board_string = "105802000090076405200400819019007306762083090000061050007600030430020501600308900"
 
 game = Sudoku.new(board_string)
-p game.sudoku_board
 # p game.what_is_in_this_row(0) == [0, 9, 6, 0, 4, 0, 0, 0, 1]
-# p game.check_row(0) == [2, 3, 5, 7, 8]
+# p game.possible_values_in_row(0) == [2, 3, 5, 7, 8]
 # p game.what_is_in_this_column(5) == [0, 0, 0, 0, 0, 3, 0, 0, 0]
 # p game.what_is_in_this_column(0) == [0, 1, 5, 0, 0, 4, 0, 0, 0]
-# p game.check_column(0) == [2, 3, 6, 7, 8, 9]
+# p game.possible_values_in_column(0) == [2, 3, 6, 7, 8, 9]
 
 # p game.check_cell(0, 0) == [2, 3, 7, 8]
 # Remember: this will just fill out what it can and not "guess"
-
-50.times {p game.solve!}
-
-puts game.board
+puts "Original board:"
+game.board
+game.solve!
+puts
+puts "Solution:"
+game.board
+# p game.is_it_solved?
 #
 # FOR TESTING
 
@@ -152,4 +147,4 @@ puts game.board
 #   actual == expected
 # end
 
-# p test([2, 3, 5, 7, 8], game.check_row(0))
+# p test([2, 3, 5, 7, 8], game.possible_values_in_row(0))
