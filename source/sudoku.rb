@@ -1,32 +1,3 @@
-require 'pry'
-require 'pry-nav'
-=begin
-class Sudoku
-  def initialize(board_string)
-  end
-
-  def solve!
-  end
-
-  # Returns a string representing the current state of the board
-  # Don't spend too much time on this method; flag someone from staff
-  # if you are.
-  def board
-
-  end
-end
-
-=end
-
-# The file has newlines at the end of each line, so we call
-# String#chomp to remove them.
-
-
-# game = Sudoku.new(board_string)
-
-# Remember: this will just fill out what it can and not "guess"
-
-
 class Cell
   attr_accessor :row, :column, :value, :local_grid, :possible_set
   def initialize(index)
@@ -39,27 +10,14 @@ class Cell
   end
 
   def solve
-     # binding.pry
     if @value == 0
       total_elimination = (@row + @column + @local_grid).uniq.select{|x| x!=0}
-      #p total_elimination
-      # p @possible_set
       @possible_set -= total_elimination
-      # p @possible_set
 
-
-      if @possible_set.empty?
-        # binding.pry
-         puts "This is unsolvable"
-      end
       if @possible_set.length == 1
-        binding.pry
         @value += @possible_set[0]
-        puts "Value changed to #{@value}"
-        @row[@index / 9] = @value
-        @column[@index % 9] = @value
-
-
+        @row[@index % 9] = @value
+        @column[@index / 9] = @value
       end
     end
   end
@@ -90,7 +48,7 @@ class Sudoku
       cell.value = list[cell_index]
       cell.row = list.each_slice(9).to_a[cell_index / 9]
       cell.column = list.each_slice(9).to_a.transpose[cell_index % 9]
-      grid_num = get_grid_number(cell_index+1)
+      grid_num = get_grid_number(cell_index)
       cell.local_grid = get_local_grid(list, grid_num).flatten
     end
   end
@@ -103,7 +61,7 @@ class Sudoku
   end
 
   def get_grid_number(index)
-    sliced_numbers = (1..81).to_a.each_slice(27).to_a
+    sliced_numbers = (0..80).to_a.each_slice(27).to_a
     return 9 if index == 81
     section = sliced_numbers.find{|num| num.include?(index)}.each_slice(9).to_a.transpose.each_slice(3).to_a.flatten
     box_number = section.index(index) / 9
@@ -120,24 +78,39 @@ class Sudoku
     (0..80).step(9).each do |n|
       rows_complete = false if @board[n].row.sort != completed_item
     end
-    columns_complete && rows_complete
+    if columns_complete && rows_complete
+      print_board
+      true
+    end
+  end
+
+  def solve_board
+    i = 0
+    until solved?
+      @board.each do |cell|
+        cell.solve
+        change_board
+        break if solved?
+      end
+      i+=1
+      break if i == 10
+    end
+    if i == 10
+      p "Unsolvable"
+    else
+      p "Solved!"
+    end
+  end
+
+  def print_board
+    @value_list = @value_list.each_slice(9)
+    @value_list.each { |x| p x }
   end
 end
-# board_string = File.readlines('sample.unsolved.txt').first.chomp
-board_string = '094000007135800940000005030008310200012040580003058700040900000051002498300000170'
+
+board_string = File.readlines('sample.unsolved.txt').first.chomp
+
 sudoku = Sudoku.new(board_string)
-#sudoku.board.each {|x| puts "#{x.column} #{x.row} #{x.local_grid} #{x.value}"}
-
-until sudoku.solved?
-  sudoku.board.each do |cell|
-    # p cell.value
-    cell.solve
-    sudoku.change_board
-    # p "changing #{cell.value}"
-    break if sudoku.solved?
-  end
-
-end
 
 
-p sudoku.solved?
+sudoku.solve_board
